@@ -2,6 +2,7 @@
 import joblib
 import pandas as pd
 from pathlib import Path
+from time import perf_counter
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -109,15 +110,35 @@ if __name__ == "__main__":
     print("Entrenamiento:", X_train.shape)
     print("Prueba:", X_test.shape)
 
-    # 5. Entrenar los tres modelos
+    
+    # 5. Entrenar los tres modelos y medir tiempos
+
     print("\nEntrenando Random Forest...")
+    inicio = perf_counter()
     random_forest = train_random_forest(X_train, y_train)
+    tiempo_rf = perf_counter() - inicio
 
-    print("Entrenando KNN...")
+    print("\nEntrenando KNN...")
+    inicio = perf_counter()
     knn = train_knn(X_train, y_train)
+    tiempo_knn = perf_counter() - inicio
 
-    print("Entrenando SVM...")
+    print("\nEntrenando SVM...")
+    inicio = perf_counter()
     svm = train_svm(X_train, y_train)
+    tiempo_svm = perf_counter() - inicio
+
+    tiempos_entrenamiento = {
+        "Random Forest": tiempo_rf,
+        "KNN": tiempo_knn,
+        "SVM": tiempo_svm
+    }
+
+    print("\nTodos los modelos fueron entrenados.")
+
+    print("\nTiempos de entrenamiento:")
+    for nombre, tiempo in tiempos_entrenamiento.items():
+        print(f"{nombre}: {tiempo:.4f} segundos")
 
     print("\nTodos los modelos fueron entrenados.")
 
@@ -147,7 +168,8 @@ if __name__ == "__main__":
         resultados_comparacion.append({
             "Modelo": nombre,
             "Accuracy": resultados["accuracy"],
-            "F1-score": resultados["f1_score"]
+            "F1-score": resultados["f1_score"],
+            "Tiempo (s)": tiempos_entrenamiento[nombre]
         })
 
     # 7. Crear tabla comparativa
