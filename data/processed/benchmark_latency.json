@@ -1,0 +1,8 @@
+{
+    "modelo": "K-Means",
+    "numero_predicciones": 100,
+    "unidad": "milisegundos",
+    "latencia_promedio_ms": 0.4684830000041984,
+    "latencia_minima_ms": 0.21569999807979912,
+    "latencia_maxima_ms": 1.5485000003536697
+}
