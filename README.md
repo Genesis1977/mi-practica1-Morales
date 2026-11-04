@@ -278,3 +278,31 @@ https://archive.ics.uci.edu/dataset/194/wall+following+robot+navigation+data
 ## 16. Repositorio
 
 GitHub: https://github.com/Genesis1977/mi-practica1-Morales
+
+## Práctica 2 — Sesión 2: Matriz de costos
+
+En esta sesión se evalúa el impacto económico simulado de los errores de clasificación de Random Forest y de un modelo trivial, utilizando el problema binario definido en la Sesión 1.
+
+Se asigna un costo de **$50 por falso positivo (FP)** y **$500 por falso negativo (FN)**, conforme a los valores establecidos en la actividad.
+
+Estos costos representan un escenario hipotético de navegación robótica. Un falso positivo podría provocar una respuesta preventiva innecesaria, mientras que un falso negativo podría representar la omisión de una condición relevante para la navegación. Por esta razón, se considera que el falso negativo tiene un impacto diez veces mayor.
+
+El costo total se calcula mediante:
+
+**Costo total = (FP × $50) + (FN × $500)**
+
+La comparación permite determinar si Random Forest reduce los costos simulados respecto a un clasificador trivial que siempre predice la clase negativa.
+
+### Práctica 2 — Sesión 2: Matriz de costos
+
+Para evaluar el impacto económico de los errores de clasificación se establecieron costos simulados de $50 por falso positivo (FP) y $500 por falso negativo (FN).
+
+El falso negativo tiene un costo diez veces mayor porque representa un caso positivo que el sistema no consigue identificar. En un escenario hipotético de supervisión robótica, este tipo de error podría implicar una situación relevante no detectada.
+
+Los valores son supuestos académicos y no corresponden a costos económicos reales medidos en un robot.
+
+La función utilizada es:
+
+**Costo total = (FP × $50) + (FN × $500)**
+
+Esta evaluación permite comparar los modelos considerando tanto su rendimiento predictivo como las consecuencias de sus errores.
