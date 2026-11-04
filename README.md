@@ -293,16 +293,132 @@ El costo total se calcula mediante:
 
 La comparación permite determinar si Random Forest reduce los costos simulados respecto a un clasificador trivial que siempre predice la clase negativa.
 
-### Práctica 2 — Sesión 2: Matriz de costos
+## Práctica 2 — Evaluación, optimización y aprendizaje por refuerzo
 
-Para evaluar el impacto económico de los errores de clasificación se establecieron costos simulados de $50 por falso positivo (FP) y $500 por falso negativo (FN).
+### Descripción
 
-El falso negativo tiene un costo diez veces mayor porque representa un caso positivo que el sistema no consigue identificar. En un escenario hipotético de supervisión robótica, este tipo de error podría implicar una situación relevante no detectada.
+La Práctica 2 continúa el trabajo realizado con el dataset *Wall-Following Robot Navigation*, incorporando evaluación de modelos en escenarios desbalanceados, análisis de costos, ajuste del umbral de clasificación y optimización de hiperparámetros.
 
-Los valores son supuestos académicos y no corresponden a costos económicos reales medidos en un robot.
+Las sesiones 1 a 5 utilizan Random Forest y un clasificador trivial para estudiar el impacto de los errores de predicción. Las siguientes sesiones abordarán aprendizaje por refuerzo con Gymnasium.
 
-La función utilizada es:
+### Sesión 1 — Métricas para clases desbalanceadas
 
-**Costo total = (FP × $50) + (FN × $500)**
+Se transformó el problema original en una clasificación binaria, considerando como clase positiva a `Slight-Left-Turn`, identificada como clase minoritaria.
 
-Esta evaluación permite comparar los modelos considerando tanto su rendimiento predictivo como las consecuencias de sus errores.
+Se compararon Random Forest y un modelo trivial que predice siempre la clase negativa.
+
+El modelo trivial obtuvo aproximadamente 93,96 % de Accuracy, pero un F1-score de 0 para la clase positiva. Esto demuestra que una exactitud elevada no garantiza un buen desempeño cuando las clases están desbalanceadas.
+
+Se utilizaron Accuracy, Precision, Recall, F1-score y matriz de confusión para evaluar los modelos.
+
+**Archivo:** `notebooks/notebooks/p2_01_metricas.ipynb`
+
+### Sesión 2 — Matriz de costos
+
+Se implementó una matriz de costos para evaluar las consecuencias simuladas de los errores de clasificación.
+
+Se asignaron los siguientes valores:
+
+- Falso positivo (FP): $50.
+- Falso negativo (FN): $500.
+
+**Fórmula:**
+
+Costo total = (FP × 50) + (FN × 500)
+
+Los costos representan supuestos académicos para un escenario hipotético de navegación robótica. No corresponden a costos económicos reales medidos en un robot.
+
+Se asignó un costo mayor a los falsos negativos porque representan situaciones positivas que el clasificador no consigue detectar.
+
+**Archivo:** `src/p2_02_costos.py`
+
+### Sesión 3 — Threshold Tuning
+
+Se implementó un procedimiento de ajuste del umbral de decisión para reducir el costo simulado de los errores de clasificación.
+
+Los datos originales de entrenamiento se dividieron nuevamente en entrenamiento y validación mediante una partición estratificada.
+
+Se evaluaron umbrales entre 0.10 y 0.90, con incrementos de 0.05. El umbral de menor costo se seleccionó utilizando exclusivamente el conjunto de validación.
+
+Posteriormente, se entrenó un modelo con todo el conjunto original de entrenamiento y se evaluó el umbral seleccionado sobre el conjunto de prueba.
+
+Este procedimiento evita utilizar los datos de prueba para seleccionar el umbral, reduciendo el riesgo de fuga de información.
+
+**Archivos:**
+
+- `src/p2_03_threshold.py`
+- `reports/figures/threshold_tuning.png`
+- `data/processed/p2_threshold_validacion.csv`
+- `data/processed/p2_threshold_comparacion.csv`
+
+### Sesión 4 — Optimización de hiperparámetros con Optuna
+
+Se utilizó Optuna para optimizar los hiperparámetros de Random Forest mediante 20 pruebas y validación cruzada estratificada de tres particiones.
+
+Los hiperparámetros evaluados fueron `n_estimators`, `max_depth`, `min_samples_split`, `min_samples_leaf` y `max_features`.
+
+**Resultados:**
+
+- Pruebas completadas: 20.
+- Mejor F1 promedio de validación cruzada: 0.9580.
+- Número de árboles: 175.
+- Profundidad máxima: 8.
+- Mínimo de muestras para dividir: 6.
+- Mínimo de muestras por hoja: 1.
+- Variables consideradas por división: `log2`.
+
+El estudio se almacena mediante SQLite y permite recuperar las pruebas existentes sin ejecutar nuevas pruebas innecesariamente.
+
+**Archivo:** `src/p2_04_optuna.py`
+
+### Sesión 5 — Análisis y comparación de modelos
+
+Se analizaron los resultados obtenidos mediante Optuna, incluyendo el historial de optimización y la importancia relativa de los hiperparámetros.
+
+Se compararon Random Forest original y Random Forest optimizado sobre el conjunto de prueba.
+
+| Métrica | Random Forest original | Random Forest Optuna |
+|---|---:|---:|
+| Accuracy | 0.996337 | 0.997253 |
+| Precision | 0.984375 | 0.984615 |
+| Recall | 0.954545 | 0.969697 |
+| F1-score | 0.969231 | 0.977099 |
+| Falsos positivos | 1 | 1 |
+| Falsos negativos | 3 | 2 |
+| Costo simulado | $1,550 | $1,050 |
+
+El modelo optimizado mejoró el F1-score y redujo de tres a dos los falsos negativos, manteniendo un falso positivo.
+
+La reducción del costo simulado fue de aproximadamente 32.26 %, equivalente a $500.
+
+Estos resultados corresponden a la evaluación experimental del dataset y no constituyen una validación sobre un robot físico.
+
+**Archivos:**
+
+- `src/p2_05_optuna_analisis.py`
+- `config.json`
+- `reports/figures/optuna_historial.png`
+- `reports/figures/optuna_parametros.png`
+
+### Ejecución de las sesiones
+
+Los siguientes comandos deben ejecutarse desde la carpeta principal del repositorio, con el entorno virtual y las dependencias instaladas.
+
+```powershell
+.\venv\Scripts\python.exe src\p2_02_costos.py
+.\venv\Scripts\python.exe src\p2_03_threshold.py
+.\venv\Scripts\python.exe src\p2_04_optuna.py
+.\venv\Scripts\python.exe src\p2_05_optuna_analisis.py
+```
+
+La Sesión 1 se ejecuta desde su notebook utilizando el intérprete de Python del entorno virtual.
+
+Los scripts requieren el archivo `data/processed/dataset.parquet`, generado durante la Práctica 1.
+
+Para reproducir la optimización de Optuna se recomienda ejecutar primero la Sesión 4 y después la Sesión 5.
+
+### Estado del proyecto
+
+Las sesiones 1 a 5 de la Práctica 2 se encuentran implementadas. Se comprobó la ejecución correcta de las sesiones 4 y 5, incluyendo la persistencia de las 20 pruebas de Optuna y la comparación final de modelos.
+
+La siguiente etapa corresponde a la Sesión 6, dedicada a la introducción al aprendizaje por refuerzo mediante Gymnasium y el entorno CartPole.
