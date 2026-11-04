@@ -65,9 +65,12 @@ def main():
         return float(puntuaciones.mean())
 
     estudio = optuna.create_study(
-        direction="maximize",
-        sampler=optuna.samplers.TPESampler(seed=42)
-    )
+    direction="maximize",
+    sampler=optuna.samplers.TPESampler(seed=42),
+    storage=f"sqlite:///{(SALIDA / 'p2_optuna.db').as_posix()}",
+    study_name="p2_random_forest",
+    load_if_exists=True
+)
 
     estudio.optimize(objetivo, n_trials=N_TRIALS)
 

@@ -1,7 +1,7 @@
 
 from pathlib import Path
 import json
-
+import optuna
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -83,33 +83,29 @@ def main():
     )
     plt.close()
 
-    # Grafica 2: importancia de hiperparametros
-    # Se calcula mediante correlacion absoluta de Spearman.
-    columnas = [
-        c for c in trials.columns
-        if c.startswith("params_")
-    ]
-
-    codificados = pd.get_dummies(
-        trials[columnas], dtype=float
+    
+# Grafica 2: importancia oficial de Optuna
+    estudio = optuna.load_study(
+        study_name="p2_random_forest",
+        storage=f"sqlite:///{(DATOS / 'p2_optuna.db').as_posix()}"
     )
 
-    importancias = (
-        codificados.corrwith(
-            trials["value"], method="spearman"
-        )
-        .abs()
-        .fillna(0)
-        .sort_values()
+    importancias = optuna.importance.get_param_importances(
+        estudio
     )
+
+    serie = pd.Series(importancias).sort_values()
 
     plt.figure(figsize=(9, 5))
-    importancias.plot(kind="barh")
-    plt.xlabel("Correlacion absoluta con F1")
-    plt.title("Relacion entre parametros y F1")
+    serie.plot(kind="barh")
+
+    plt.xlabel("Importancia relativa")
+    plt.title("Optuna - Importancia de hiperparametros")
     plt.tight_layout()
+
     plt.savefig(
-        FIGURAS / "optuna_parametros.png", dpi=300
+        FIGURAS / "optuna_parametros.png",
+        dpi=300
     )
     plt.close()
 
