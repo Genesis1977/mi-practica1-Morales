@@ -1,0 +1,9 @@
+{
+    "random_forest": {
+        "n_estimators": 175,
+        "max_depth": 8,
+        "min_samples_split": 6,
+        "min_samples_leaf": 1,
+        "max_features": "log2"
+    }
+}
