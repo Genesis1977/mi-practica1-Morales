@@ -422,3 +422,83 @@ Para reproducir la optimización de Optuna se recomienda ejecutar primero la Ses
 Las sesiones 1 a 5 de la Práctica 2 se encuentran implementadas. Se comprobó la ejecución correcta de las sesiones 4 y 5, incluyendo la persistencia de las 20 pruebas de Optuna y la comparación final de modelos.
 
 La siguiente etapa corresponde a la Sesión 6, dedicada a la introducción al aprendizaje por refuerzo mediante Gymnasium y el entorno CartPole.
+
+### Sesión 6 — Introducción a Gymnasium y CartPole
+
+**Objetivo:** implementar un agente aleatorio en el entorno `CartPole-v1` de Gymnasium y analizar las recompensas obtenidas durante cinco episodios.
+
+Se utilizó Gymnasium para crear el entorno, reiniciar los episodios, seleccionar acciones aleatorias y registrar las recompensas acumuladas.
+
+El agente no realiza aprendizaje. Su comportamiento sirve como referencia inicial para futuras comparaciones con agentes entrenados mediante aprendizaje por refuerzo.
+
+**Resultados obtenidos:**
+
+| Episodio | Pasos | Recompensa |
+|---|---:|---:|
+| 1 | 93 | 93 |
+| 2 | 44 | 44 |
+| 3 | 10 | 10 |
+| 4 | 20 | 20 |
+| 5 | 20 | 20 |
+
+- Recompensa promedio: 37.40.
+- Recompensa mínima: 10.
+- Recompensa máxima: 93.
+- Episodios ejecutados: 5.
+
+Los resultados muestran variaciones entre episodios debido a la selección aleatoria de acciones. El agente no mantiene un rendimiento constante, ya que no dispone de una política aprendida.
+
+**Archivos:**
+
+- `src/p2_06_cartpole_random.py`
+- `reports/figures/p2_cartpole_random.png`
+- `data/processed/p2_cartpole_random.csv` (generado localmente).
+
+### Sesión 7 — Entorno personalizado con Gymnasium
+
+**Objetivo:** desarrollar un entorno personalizado compatible con Gymnasium, definiendo observaciones, acciones, recompensas y condiciones de finalización.
+
+Se implementó `RobotLineEnv`, un entorno simplificado que representa el desplazamiento de un robot sobre una línea de posiciones.
+
+**Características del entorno:**
+
+- Posición inicial: 0.
+- Posición objetivo: 10.
+- Acción 0: desplazamiento hacia la izquierda.
+- Acción 1: desplazamiento hacia la derecha.
+- Recompensa por movimiento sin alcanzar la meta: -1.
+- Recompensa al alcanzar la meta: +100.
+- Límite máximo: 30 pasos por episodio.
+
+El entorno utiliza los métodos `reset()`, `step()`, `render()` y `close()` de la interfaz de Gymnasium.
+
+Se utilizó `check_env` de Stable Baselines3 para comprobar su compatibilidad.
+
+Posteriormente, se evaluaron dos políticas: una aleatoria y otra basada en reglas que siempre avanza hacia la meta.
+
+**Resultados obtenidos:**
+
+| Métrica | Política aleatoria | Política basada en reglas |
+|---|---:|---:|
+| Episodios | 5 | 5 |
+| Recompensa promedio | 15.0 | 91.0 |
+| Pasos promedio | 25.4 | 10.0 |
+| Tasa de éxito | 40 % | 100 % |
+
+La política aleatoria alcanzó la meta en dos de los cinco episodios. La política basada en reglas alcanzó la meta en todos los episodios y necesitó únicamente diez pasos por ejecución.
+
+Estos resultados permiten comprobar que el entorno responde correctamente a las acciones y que una política dirigida hacia el objetivo obtiene mejores resultados que una política aleatoria en esta simulación.
+
+**Archivos:**
+
+- `src/p2_07_robot_env.py`
+- `src/p2_07_test_env.py`
+- `data/processed/p2_robot_env_resultados.csv` (generado localmente).
+
+### Conclusión de las sesiones 6 y 7
+
+Se logró implementar un agente aleatorio en CartPole y desarrollar un entorno personalizado compatible con Gymnasium.
+
+Las pruebas permitieron comprender el funcionamiento de los episodios, las observaciones, las acciones, las recompensas y las condiciones de terminación.
+
+Estos experimentos establecen una base para el entrenamiento de agentes mediante algoritmos de aprendizaje por refuerzo, como PPO, en las siguientes sesiones.
