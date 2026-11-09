@@ -502,3 +502,36 @@ Se logró implementar un agente aleatorio en CartPole y desarrollar un entorno p
 Las pruebas permitieron comprender el funcionamiento de los episodios, las observaciones, las acciones, las recompensas y las condiciones de terminación.
 
 Estos experimentos establecen una base para el entrenamiento de agentes mediante algoritmos de aprendizaje por refuerzo, como PPO, en las siguientes sesiones.
+
+### Sesión 8 — Entrenamiento de un agente PPO
+
+**Objetivo:** entrenar un agente de aprendizaje por refuerzo utilizando el algoritmo Proximal Policy Optimization (PPO) en el entorno personalizado RobotLineEnv.
+
+Se utilizó Stable Baselines3 con una política `MlpPolicy`, una tasa de aprendizaje de 0.0003, factor de descuento de 0.99 y un entrenamiento solicitado de 10.000 pasos.
+
+El entorno representa un robot que debe desplazarse desde la posición 0 hasta la posición 10. El agente recibe una recompensa de +100 al alcanzar la meta y una penalización de -1 por cada paso sin alcanzarla.
+
+Se implementó un callback para registrar la recompensa acumulada y la duración de los episodios. También se generó una gráfica del entrenamiento con un promedio móvil de 20 episodios.
+
+**Archivos:**
+
+- `src/p2_08_ppo_entrenamiento.py`
+- `models/p2_ppo_robot.zip`
+- `reports/figures/p2_ppo_entrenamiento.png`
+- `data/processed/p2_ppo_entrenamiento.csv` (generado localmente)
+
+**Comando de ejecución:**
+
+```powershell
+.\venv\Scripts\python.exe src\p2_08_ppo_entrenamiento.py
+```
+
+El modelo entrenado se utilizará en la Sesión 9 para comparar PPO con las políticas aleatoria y basada en reglas.
+
+### Estado del proyecto
+
+Las sesiones 1 a 8 de la Práctica 2 se encuentran implementadas.
+
+Las sesiones 6 y 7 permitieron trabajar con Gymnasium y desarrollar un entorno personalizado. En la Sesión 8 se implementó el entrenamiento de un agente PPO.
+
+La siguiente etapa corresponde a la Sesión 9, dedicada a evaluar y comparar las políticas PPO, aleatoria y basada en reglas.
