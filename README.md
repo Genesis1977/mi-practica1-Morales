@@ -535,3 +535,47 @@ Las sesiones 1 a 8 de la Práctica 2 se encuentran implementadas.
 Las sesiones 6 y 7 permitieron trabajar con Gymnasium y desarrollar un entorno personalizado. En la Sesión 8 se implementó el entrenamiento de un agente PPO.
 
 La siguiente etapa corresponde a la Sesión 9, dedicada a evaluar y comparar las políticas PPO, aleatoria y basada en reglas.
+
+### Sesión 9 — Evaluación comparativa de políticas
+
+Se realizó una evaluación de tres políticas en el entorno personalizado RobotLineEnv: agente aleatorio, política basada en reglas y agente PPO entrenado.
+
+Cada política fue evaluada durante 30 episodios utilizando las mismas condiciones del entorno.
+
+Las métricas consideradas fueron:
+
+- Recompensa acumulada promedio.
+- Desviación estándar de las recompensas.
+- Número promedio de pasos.
+- Tasa de éxito al alcanzar la meta.
+
+El modelo PPO se cargó desde `models/p2_ppo_robot.zip` y se evaluó sin realizar entrenamiento adicional.
+
+Los resultados se almacenaron en archivos CSV y se representaron mediante gráficas comparativas.
+
+**Archivos:**
+
+- `src/p2_09_evaluacion_ppo.py`
+- `data/processed/p2_09_episodios.csv`
+- `data/processed/p2_09_comparacion.csv`
+- `reports/figures/p2_09_recompensas.png`
+- `reports/figures/p2_09_tasa_exito.png`
+
+### Sesión 10 — Documentación de resultados
+
+Se consolidaron los resultados de las sesiones 6 a 9 en un reporte reproducible.
+
+El documento incluye las pruebas con CartPole, el funcionamiento del entorno personalizado, el entrenamiento PPO y la comparación de políticas.
+
+Se desarrolló un script que recupera los resultados experimentales de los archivos CSV y genera un reporte en formato Markdown.
+
+**Archivos:**
+
+- `src/p2_10_reporte.py`
+- `reports/p2_reporte_sesiones_6_9.md`
+
+### Estado del proyecto
+
+Las sesiones 1 a 10 de la Práctica 2 se encuentran desarrolladas, pendientes de la verificación final de ejecución de las sesiones 9 y 10.
+
+Las siguientes actividades corresponden a la preparación de la presentación, el video demostrativo y la entrega final.
