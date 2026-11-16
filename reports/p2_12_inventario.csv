@@ -1,0 +1,12 @@
+Archivo,Disponible
+README.md,True
+requirements.txt,True
+src/p2_11_auditoria.py,True
+src/p2_12_entrega_final.py,True
+models/p2_ppo_robot.zip,True
+reports/p2_reporte_sesiones_6_9.md,True
+reports/p2_11_auditoria.json,True
+reports/figures/p2_cartpole_random.png,True
+reports/figures/p2_ppo_entrenamiento.png,True
+reports/figures/p2_09_recompensas.png,True
+reports/figures/p2_09_tasa_exito.png,True

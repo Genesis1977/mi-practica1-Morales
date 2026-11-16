@@ -1,0 +1,16 @@
+{
+    "fecha": "2026-11-16T12:46:27",
+    "archivos_verificados": 17,
+    "archivos_presentes": 17,
+    "archivos_faltantes": [],
+    "dependencias_correctas": true,
+    "resultados_csv_presentes": 5,
+    "resultados_csv_esperados": 5,
+    "modelo_ppo": {
+        "carga_correcta": true,
+        "recompensa": 91.0,
+        "pasos": 10,
+        "meta_alcanzada": true
+    },
+    "auditoria_aprobada": true
+}

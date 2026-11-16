@@ -579,3 +579,55 @@ Se desarrolló un script que recupera los resultados experimentales de los archi
 Las sesiones 1 a 10 de la Práctica 2 se encuentran desarrolladas, pendientes de la verificación final de ejecución de las sesiones 9 y 10.
 
 Las siguientes actividades corresponden a la preparación de la presentación, el video demostrativo y la entrega final.
+
+### Sesión 11 — Auditoría automática del proyecto
+
+Se implementó un procedimiento de auditoría para verificar la presencia de los archivos de las sesiones anteriores, las dependencias de Python y el modelo PPO entrenado.
+
+El script realiza una prueba de ejecución del modelo PPO sobre el entorno personalizado y registra los resultados.
+
+También verifica la disponibilidad de los archivos CSV generados durante los experimentos.
+
+**Archivos:**
+
+- `src/p2_11_auditoria.py`
+- `reports/p2_11_archivos.csv`
+- `reports/p2_11_dependencias.csv`
+- `reports/p2_11_resultados.csv`
+- `reports/p2_11_auditoria.json`
+
+**Ejecución:**
+
+```powershell
+.\venv\Scripts\python.exe src\p2_11_auditoria.py
+```
+
+### Sesión 12 — Informe y entrega final
+
+Se implementó un procedimiento para consolidar los resultados experimentales y preparar la documentación final de la Práctica 2.
+
+El informe reúne las actividades de clasificación supervisada, optimización de hiperparámetros y aprendizaje por refuerzo.
+
+Se incluyen los resultados de la comparación de políticas y una revisión de las evidencias disponibles.
+
+**Archivos:**
+
+- `src/p2_12_entrega_final.py`
+- `reports/p2_12_informe_final.md`
+- `reports/p2_12_inventario.csv`
+
+**Ejecución:**
+
+```powershell
+.\venv\Scripts\python.exe src\p2_12_entrega_final.py
+```
+
+### Estado final de la Práctica 2
+
+Se desarrollaron las doce sesiones de la Práctica 2, integrando evaluación de clasificadores, análisis de costos, ajuste de umbrales, optimización mediante Optuna y aprendizaje por refuerzo con Gymnasium y Stable Baselines3.
+
+En la evaluación de 30 episodios, el agente PPO obtuvo una recompensa promedio de 91,00 y una tasa de éxito del 100 %, igualando a la política basada en reglas en el entorno RobotLineEnv.
+
+Las sesiones finales incorporan herramientas para auditar los archivos del proyecto, verificar el modelo entrenado y generar un informe consolidado.
+
+La entrega queda sujeta a la ejecución satisfactoria de las verificaciones finales y a los requisitos establecidos por el docente.

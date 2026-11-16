@@ -1,0 +1,6 @@
+Archivo,Existe
+p2_cartpole_random.csv,True
+p2_robot_env_resultados.csv,True
+p2_ppo_entrenamiento.csv,True
+p2_09_episodios.csv,True
+p2_09_comparacion.csv,True

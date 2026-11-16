@@ -1,0 +1,18 @@
+Sesion,Archivo,Existe,Tamano_bytes
+Sesión 1,notebooks/notebooks/p2_01_metricas.ipynb,True,58449
+Sesión 2,src/p2_02_costos.py,True,3540
+Sesión 3,src/p2_03_threshold.py,True,7885
+Sesión 4,src/p2_04_optuna.py,True,5900
+Sesión 5,src/p2_05_optuna_analisis.py,True,4522
+Sesión 6,src/p2_06_cartpole_random.py,True,3303
+Sesión 6,reports/figures/p2_cartpole_random.png,True,68162
+Sesión 7,src/p2_07_robot_env.py,True,2680
+Sesión 7,src/p2_07_test_env.py,True,3197
+Sesión 8,src/p2_08_ppo_entrenamiento.py,True,5780
+Sesión 8,models/p2_ppo_robot.zip,True,136821
+Sesión 8,reports/figures/p2_ppo_entrenamiento.png,True,196637
+Sesión 9,src/p2_09_evaluacion_ppo.py,True,5476
+Sesión 9,reports/figures/p2_09_recompensas.png,True,70674
+Sesión 9,reports/figures/p2_09_tasa_exito.png,True,56653
+Sesión 10,src/p2_10_reporte.py,True,5723
+Sesión 10,reports/p2_reporte_sesiones_6_9.md,True,1966

@@ -1,0 +1,9 @@
+Paquete,Instalado,Version
+numpy,True,2.5.3
+pandas,True,3.0.6
+scikit-learn,True,1.9.1
+matplotlib,True,3.11.2
+gymnasium,True,1.4.0
+stable-baselines3,True,2.9.2
+optuna,True,5.0.0
+pyarrow,True,25.0.1
