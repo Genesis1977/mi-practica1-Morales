@@ -1,0 +1,4 @@
+Politica,recompensa_promedio,recompensa_std,pasos_promedio,tasa_exito
+Aleatorio,-22.6,28.239859333438858,29.333333333333332,6.666666666666667
+Reglas,91.0,0.0,10.0,100.0
+PPO,91.0,0.0,10.0,100.0
