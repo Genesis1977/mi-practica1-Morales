@@ -1,0 +1,33 @@
+{
+    "modelo_original": "C:\\Users\\genes\\Documents\\mi-practica1-Morales\\models\\random_forest.pkl",
+    "modelo_onnx": "C:\\Users\\genes\\Documents\\mi-practica1-Morales\\models\\modelo.onnx",
+    "variables": 24,
+    "muestras": 100,
+    "coincidencias": 100,
+    "diferencias": 0,
+    "coincidencia_porcentaje": 100.0,
+    "predicciones_original": [
+        "Move-Forward",
+        "Slight-Right-Turn",
+        "Move-Forward",
+        "Move-Forward",
+        "Sharp-Right-Turn",
+        "Move-Forward",
+        "Slight-Right-Turn",
+        "Move-Forward",
+        "Move-Forward",
+        "Move-Forward"
+    ],
+    "predicciones_onnx": [
+        "Move-Forward",
+        "Slight-Right-Turn",
+        "Move-Forward",
+        "Move-Forward",
+        "Sharp-Right-Turn",
+        "Move-Forward",
+        "Slight-Right-Turn",
+        "Move-Forward",
+        "Move-Forward",
+        "Move-Forward"
+    ]
+}

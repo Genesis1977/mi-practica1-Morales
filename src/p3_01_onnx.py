@@ -1,12 +1,20 @@
 
+"""
+PRACTICA 3 - SESION 1
+Exportacion de Random Forest a ONNX.
+
+Compara las predicciones del modelo original
+con las obtenidas mediante ONNX Runtime.
+"""
+
 from pathlib import Path
 import json
 
 import joblib
 import numpy as np
-import pandas as pd
 import onnx
 import onnxruntime as ort
+import pandas as pd
 
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
@@ -14,129 +22,228 @@ from skl2onnx.common.data_types import FloatTensorType
 
 BASE = Path(__file__).resolve().parent.parent
 MODELOS = BASE / "models"
-DATOS = BASE / "data" / "processed"
 REPORTES = BASE / "reports"
+DATOS = BASE / "data" / "processed"
 
-MODELO_ORIGINAL = MODELOS / "random_forest.pkl"
-MODELO_ONNX = MODELOS / "modelo.onnx"
+REPORTES.mkdir(parents=True, exist_ok=True)
 
-SENSORES = [f"sensor_{i}" for i in range(1, 25)]
+RUTA_ORIGINAL = MODELOS / "random_forest.pkl"
+RUTA_ONNX = MODELOS / "modelo.onnx"
+RUTA_DATASET = DATOS / "dataset.parquet"
 
 
-def main():
-    """Exporta Random Forest a ONNX y compara predicciones."""
+def cargar_modelo():
+    """Carga el modelo Random Forest existente."""
 
-    REPORTES.mkdir(parents=True, exist_ok=True)
-
-    if not MODELO_ORIGINAL.is_file():
+    if not RUTA_ORIGINAL.exists():
         raise FileNotFoundError(
-            f"No se encontró: {MODELO_ORIGINAL}"
+            f"No se encontro: {RUTA_ORIGINAL}"
         )
 
-    # Cargar modelo original de scikit-learn
-    modelo = joblib.load(MODELO_ORIGINAL)
+    modelo = joblib.load(RUTA_ORIGINAL)
 
     if not hasattr(modelo, "predict"):
         raise TypeError(
             "El archivo no contiene un predictor compatible."
         )
 
-    # Recuperar ejemplos reales del dataset
-    df = pd.read_parquet(
-        DATOS / "dataset.parquet"
-    )
+    if not hasattr(modelo, "n_features_in_"):
+        raise ValueError(
+            "No se pudo determinar el numero de variables."
+        )
 
-    X = df[SENSORES].head(100).astype(np.float32)
+    return modelo
 
-    if len(X) == 0:
-        raise ValueError("El dataset no contiene registros.")
 
-    # Convertir el modelo al formato ONNX
-    tipo_entrada = [
-        ("input", FloatTensorType([None, 24]))
+def exportar_onnx(modelo):
+    """Convierte el estimador a ONNX."""
+
+    cantidad_variables = int(modelo.n_features_in_)
+
+    tipos_entrada = [
+        (
+            "input",
+            FloatTensorType([None, cantidad_variables])
+        )
     ]
 
-    modelo_convertido = convert_sklearn(
+    modelo_onnx = convert_sklearn(
         modelo,
-        initial_types=tipo_entrada,
-        options={id(modelo): {"zipmap": False}},
-        target_opset=15
+        initial_types=tipos_entrada,
+        target_opset=17
     )
 
-    onnx.checker.check_model(modelo_convertido)
+    onnx.checker.check_model(modelo_onnx)
 
-    # Guardar archivo ONNX
-    MODELO_ONNX.write_bytes(
-        modelo_convertido.SerializeToString()
+    RUTA_ONNX.write_bytes(
+        modelo_onnx.SerializeToString()
     )
 
-    # Cargar ONNX Runtime
+    return cantidad_variables
+
+
+def preparar_datos(modelo):
+    """
+    Prepara muestras numericas para comparar
+    ambos modelos usando la misma entrada.
+
+    No modifica ni reentrena el estimador.
+    """
+
+    if not RUTA_DATASET.exists():
+        raise FileNotFoundError(
+            f"No se encontro: {RUTA_DATASET}"
+        )
+
+    df = pd.read_parquet(RUTA_DATASET)
+
+    if hasattr(modelo, "feature_names_in_"):
+        columnas = list(modelo.feature_names_in_)
+    else:
+        columnas = [
+            f"sensor_{i}"
+            for i in range(1, 25)
+        ]
+
+    faltantes = [
+        col for col in columnas
+        if col not in df.columns
+    ]
+
+    if faltantes:
+        raise ValueError(
+            f"Columnas faltantes: {faltantes}"
+        )
+
+    if len(columnas) != modelo.n_features_in_:
+        raise ValueError(
+            "El numero de variables no coincide "
+            "con el modelo entrenado."
+        )
+
+    if "conjunto" in df.columns:
+        prueba = df[df["conjunto"] == "test"]
+    else:
+        prueba = df
+
+    if prueba.empty:
+        raise ValueError(
+            "No existen observaciones para comparar."
+        )
+
+    X = prueba[columnas].head(100)
+
+    if X.isna().any().any():
+        raise ValueError(
+            "Las muestras contienen valores faltantes."
+        )
+
+    return X.astype(np.float32)
+
+
+def comparar_predicciones(modelo, X):
+    """Compara las salidas de sklearn y ONNX."""
+
     sesion = ort.InferenceSession(
-        str(MODELO_ONNX),
+        str(RUTA_ONNX),
         providers=["CPUExecutionProvider"]
     )
 
-    nombre_entrada = sesion.get_inputs()[0].name
+    entrada = sesion.get_inputs()[0].name
 
-    # Predicciones del modelo original
-    pred_original = np.asarray(
-        modelo.predict(X)
-    ).reshape(-1)
-
-    # Predicciones del modelo ONNX
-    salida = sesion.run(
+    salidas = sesion.run(
         None,
-        {nombre_entrada: X.to_numpy()}
+        {entrada: X.to_numpy(dtype=np.float32)}
     )
 
-    pred_onnx = np.asarray(
-        salida[0]
-    ).reshape(-1)
+    pred_original = modelo.predict(X)
+    pred_onnx = np.asarray(salidas[0]).reshape(-1)
 
-    coincidencias = (
-        pred_original.astype(str)
-        == pred_onnx.astype(str)
+    coincidencias = int(
+        np.sum(pred_original == pred_onnx)
     )
 
-    porcentaje = float(
-        coincidencias.mean() * 100
+    total = len(pred_original)
+
+    porcentaje = (
+        100.0 * coincidencias / total
     )
 
-    resumen = {
-        "modelo_original": str(MODELO_ORIGINAL),
-        "modelo_onnx": str(MODELO_ONNX),
-        "muestras": len(X),
-        "coincidencias": int(coincidencias.sum()),
-        "porcentaje_coincidencia": porcentaje,
-        "salida_original": pred_original[:10].tolist(),
-        "salida_onnx": pred_onnx[:10].tolist()
+    return {
+        "muestras": total,
+        "coincidencias": coincidencias,
+        "diferencias": total - coincidencias,
+        "coincidencia_porcentaje": porcentaje,
+        "predicciones_original": (
+            np.asarray(pred_original[:10]).tolist()
+        ),
+        "predicciones_onnx": (
+            np.asarray(pred_onnx[:10]).tolist()
+        )
     }
 
-    ruta = REPORTES / "p3_01_comparacion.json"
 
-    ruta.write_text(
+def main():
+    """Ejecuta exportacion y validacion."""
+
+    print("=== PRACTICA 3 - SESION 1 ===")
+
+    modelo = cargar_modelo()
+
+    variables = exportar_onnx(modelo)
+
+    print(f"Variables de entrada: {variables}")
+    print(f"Modelo ONNX: {RUTA_ONNX}")
+
+    X = preparar_datos(modelo)
+
+    resultado = comparar_predicciones(
+        modelo, X
+    )
+
+    reporte = {
+        "modelo_original": str(RUTA_ORIGINAL),
+        "modelo_onnx": str(RUTA_ONNX),
+        "variables": variables,
+        **resultado
+    }
+
+    ruta_reporte = (
+        REPORTES / "p3_01_comparacion_onnx.json"
+    )
+
+    ruta_reporte.write_text(
         json.dumps(
-            resumen,
+            reporte,
             indent=4,
-            ensure_ascii=False,
-            default=str
+            ensure_ascii=False
         ),
         encoding="utf-8"
     )
 
-    print("\n=== PRACTICA 3 - SESION 1 ===")
-    print("Modelo ONNX:", MODELO_ONNX)
-    print("Muestras evaluadas:", len(X))
-    print("Coincidencia:", f"{porcentaje:.2f}%")
-    print("Reporte:", ruta)
+    print("\n=== COMPARACION ===")
+    print(
+        "Muestras:",
+        resultado["muestras"]
+    )
+    print(
+        "Coincidencia:",
+        f"{resultado['coincidencia_porcentaje']:.2f}%"
+    )
+    print(
+        "Diferencias:",
+        resultado["diferencias"]
+    )
+    print("\nReporte:", ruta_reporte)
 
-    if not coincidencias.all():
-        raise RuntimeError(
-            "Las predicciones ONNX y originales "
-            "no coinciden en todas las muestras."
+    if resultado["diferencias"] != 0:
+        print(
+            "\nATENCION: revisar las diferencias "
+            "antes de desplegar la API."
         )
+        raise SystemExit(1)
 
-    print("\nSesion 1 completada correctamente.")
+    print("\nSESION 1 COMPLETADA")
 
 
 if __name__ == "__main__":
