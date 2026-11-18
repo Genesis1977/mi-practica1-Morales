@@ -1,0 +1,31 @@
+{
+    "modelo_original": "C:\\Users\\genes\\Documents\\mi-practica1-Morales\\models\\random_forest.pkl",
+    "modelo_onnx": "C:\\Users\\genes\\Documents\\mi-practica1-Morales\\models\\modelo.onnx",
+    "muestras": 100,
+    "coincidencias": 100,
+    "porcentaje_coincidencia": 100.0,
+    "salida_original": [
+        "Move-Forward",
+        "Sharp-Right-Turn",
+        "Slight-Right-Turn",
+        "Slight-Right-Turn",
+        "Move-Forward",
+        "Move-Forward",
+        "Sharp-Right-Turn",
+        "Slight-Right-Turn",
+        "Sharp-Right-Turn",
+        "Move-Forward"
+    ],
+    "salida_onnx": [
+        "Move-Forward",
+        "Sharp-Right-Turn",
+        "Slight-Right-Turn",
+        "Slight-Right-Turn",
+        "Move-Forward",
+        "Move-Forward",
+        "Sharp-Right-Turn",
+        "Slight-Right-Turn",
+        "Sharp-Right-Turn",
+        "Move-Forward"
+    ]
+}
