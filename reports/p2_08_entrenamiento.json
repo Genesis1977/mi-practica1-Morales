@@ -1,0 +1,13 @@
+{
+    "sesion": 8,
+    "algoritmo": "PPO",
+    "entorno": "CartPole-v1",
+    "pasos_solicitados": 20000,
+    "pasos_reales": 20480,
+    "episodios_completados": 215,
+    "recompensa_promedio": 94.61395348837209,
+    "recompensa_maxima": 500.0,
+    "recompensa_minima": 10.0,
+    "promedio_ultimos_10": 303.0,
+    "semilla": 42
+}
