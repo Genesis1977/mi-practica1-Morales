@@ -1,0 +1,20 @@
+{
+    "sesion": 9,
+    "entorno": "CartPole-v1",
+    "episodios_por_agente": 10,
+    "PPO": {
+        "recompensa_promedio": 500.0,
+        "recompensa_maxima": 500.0,
+        "recompensa_minima": 500.0,
+        "desviacion_estandar": 0.0,
+        "episodios": 10
+    },
+    "Aleatorio": {
+        "recompensa_promedio": 33.7,
+        "recompensa_maxima": 93.0,
+        "recompensa_minima": 10.0,
+        "desviacion_estandar": 25.942436277265866,
+        "episodios": 10
+    },
+    "diferencia_promedio": 466.3
+}
