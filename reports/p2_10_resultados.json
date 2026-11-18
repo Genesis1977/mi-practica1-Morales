@@ -1,0 +1,20 @@
+{
+    "sesion": 10,
+    "entorno": "CartPole-v1",
+    "episodios_por_agente": 10,
+    "PPO": {
+        "promedio": 500.0,
+        "maximo": 500.0,
+        "minimo": 500.0,
+        "desviacion_estandar": 0.0,
+        "episodios": 10
+    },
+    "Clasico": {
+        "promedio": 500.0,
+        "maximo": 500.0,
+        "minimo": 500.0,
+        "desviacion_estandar": 0.0,
+        "episodios": 10
+    },
+    "diferencia_promedio": 0.0
+}
