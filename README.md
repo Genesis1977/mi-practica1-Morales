@@ -631,3 +631,140 @@ En la evaluación de 30 episodios, el agente PPO obtuvo una recompensa promedio 
 Las sesiones finales incorporan herramientas para auditar los archivos del proyecto, verificar el modelo entrenado y generar un informe consolidado.
 
 La entrega queda sujeta a la ejecución satisfactoria de las verificaciones finales y a los requisitos establecidos por el docente.
+
+## Práctica 2 — Evaluación de factibilidad técnica y optimización de algoritmos predictivos
+
+### Objetivo
+
+Evaluar y optimizar el pipeline de Machine Learning desarrollado en la Práctica 1, incorporando métricas para clases desbalanceadas, análisis económico de errores, optimización de hiperparámetros y aprendizaje por refuerzo.
+
+La práctica utiliza el dataset **Wall-Following Robot Navigation** para la clasificación supervisada y el entorno **CartPole-v1 de Gymnasium** para los experimentos de aprendizaje por refuerzo.
+
+### Tecnologías utilizadas
+
+- Python, NumPy, Pandas y Matplotlib.
+- Scikit-learn para clasificación y métricas.
+- Optuna para optimización de hiperparámetros.
+- Gymnasium para entornos de aprendizaje por refuerzo.
+- Stable-Baselines3 para entrenamiento con PPO.
+- Jupyter Notebook para experimentación.
+
+### Desarrollo por sesiones
+
+| Sesión | Actividad | Entregable |
+|---|---|---|
+| 1 | Evaluación de clases desbalanceadas | `p2_01_metricas.ipynb` |
+| 2 | Matriz de costos FP/FN | `p2_02_costos.py` |
+| 3 | Optimización del umbral de decisión | `p2_03_threshold.py` |
+| 4 | Estudio de hiperparámetros con Optuna | `p2_04_optuna.py` |
+| 5 | Análisis de Optuna y comparación de modelos | `p2_05_optuna_analisis.py` |
+| 6 | Exploración de CartPole-v1 | `p2_06_gymnasium.ipynb` |
+| 7 | Entorno personalizado RobotLineEnv | `p2_07_entorno_rl.py` |
+| 8 | Entrenamiento de PPO | `p2_08_entrenamiento_rl.py` |
+| 9 | Evaluación PPO frente a agente aleatorio | `p2_09_evaluacion_rl.py` |
+| 10 | Comparación PPO frente a controlador clásico | `p2_10_comparacion.py` |
+| 11 | Documentación y auditoría | `README.md` |
+| 12 | Entrega y demostración | Repositorio y demo de 5 minutos |
+
+### Instalación
+
+Desde la raíz del proyecto, instalar las dependencias del archivo `requirements.txt` y las librerías utilizadas en la Práctica 2:
+
+```powershell
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
+.\venv\Scripts\python.exe -m pip install optuna gymnasium stable-baselines3 matplotlib pandas pyarrow ipykernel
+```
+
+### Ejecución de las sesiones 2 a 5
+
+```powershell
+.\venv\Scripts\python.exe src\p2_02_costos.py
+.\venv\Scripts\python.exe src\p2_03_threshold.py
+.\venv\Scripts\python.exe src\p2_04_optuna.py
+.\venv\Scripts\python.exe src\p2_05_optuna_analisis.py
+```
+
+Los notebooks de las sesiones 1 y 6 se ejecutan desde VS Code o Jupyter, seleccionando el entorno virtual del proyecto.
+
+### Ejecución de las sesiones 7 a 10
+
+```powershell
+.\venv\Scripts\python.exe src\p2_07_entorno_rl.py
+.\venv\Scripts\python.exe src\p2_08_entrenamiento_rl.py
+.\venv\Scripts\python.exe src\p2_09_evaluacion_rl.py
+.\venv\Scripts\python.exe src\p2_10_comparacion.py
+```
+
+**Nota:** La sesión 8 entrena el modelo PPO y guarda `models/ppo_cartpole.zip`. Las sesiones 9 y 10 utilizan ese archivo para evaluar la política aprendida sin repetir el entrenamiento.
+
+### Evaluación económica
+
+Se utiliza una matriz de costos académica:
+
+- Falso positivo (FP): 50 USD.
+- Falso negativo (FN): 500 USD.
+
+**Costo total = FP × 50 + FN × 500**
+
+El costo de los falsos negativos es mayor debido al supuesto de que omitir una condición relevante para la navegación podría tener consecuencias más graves que generar una alerta innecesaria.
+
+Los valores representan un escenario simulado, no costos medidos en un robot físico.
+
+### Threshold Tuning y Optuna
+
+Se evalúan umbrales de clasificación entre 0.10 y 0.90, con incrementos de 0.05, seleccionando el umbral que minimiza el costo en validación.
+
+Posteriormente se utiliza Optuna para optimizar los hiperparámetros de Random Forest mediante validación cruzada estratificada. El estudio contempla al menos 20 pruebas.
+
+La configuración seleccionada se exporta a `config.json` y se compara con el modelo original utilizando métricas predictivas y costos.
+
+### Aprendizaje por refuerzo
+
+**Sesión 6:** exploración de CartPole-v1 mediante cinco episodios con acciones aleatorias.
+
+**Sesión 7:** desarrollo de un entorno personalizado de navegación lineal, con estados, acciones, recompensas y condiciones de terminación.
+
+**Sesión 8:** entrenamiento de PPO en CartPole-v1 con 20.000 pasos solicitados. Se guarda el modelo entrenado y se registra la evolución de las recompensas.
+
+**Sesión 9:** evaluación de PPO y de un agente aleatorio durante diez episodios por agente, calculando recompensas promedio, máximas y mínimas.
+
+**Sesión 10:** comparación de PPO con un controlador clásico basado en reglas durante diez episodios por controlador.
+
+### Evidencias y resultados
+
+Las evidencias se almacenan en las carpetas `reports/`, `reports/figures/`, `data/processed/` y `models/`.
+
+Entre los principales archivos generados se encuentran:
+
+- `reports/figures/threshold_tuning.png`
+- `reports/figures/optuna_historial.png`
+- `reports/figures/optuna_parametros.png`
+- `data/processed/p2_comparacion_optuna.csv`
+- `config.json`
+- `models/ppo_cartpole.zip`
+- `reports/figures/p2_08_recompensas.png`
+- `reports/p2_08_entrenamiento.json`
+- `reports/p2_09_evaluacion_rl.json`
+- `reports/p2_09_evaluacion_rl.csv`
+- `reports/figures/p2_09_comparacion_rl.png`
+- `reports/p2_10_resultados.json`
+- `reports/p2_10_comparacion.csv`
+- `reports/figures/p2_10_comparacion.png`
+
+Los valores experimentales deben consultarse en los reportes generados durante la ejecución.
+
+### Interpretación y limitaciones
+
+El análisis económico permite comparar modelos según las consecuencias simuladas de sus errores y no únicamente según Accuracy.
+
+Optuna permite explorar distintas configuraciones de Random Forest, aunque la mejora obtenida debe comprobarse mediante las métricas y costos de evaluación.
+
+La comparación de PPO, el agente aleatorio y el controlador clásico permite estudiar diferentes estrategias de control en CartPole-v1.
+
+Los resultados corresponden a simulaciones y experimentos académicos. No constituyen una validación de navegación autónoma en un robot físico.
+
+### Reproducibilidad
+
+Se utilizan semillas fijas cuando corresponde, se separan los conjuntos de entrenamiento, validación y prueba, y se conservan los modelos y reportes generados.
+
+El rendimiento y los tiempos de ejecución pueden variar según el equipo y las versiones de las dependencias.
