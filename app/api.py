@@ -1,236 +1,233 @@
 
+"""
+PRACTICA 3 - SESION 3
+API REST con FastAPI, ONNX y validacion Pydantic.
+
+Endpoints:
+GET  /health
+POST /predict
+
+Validaciones:
+- Exactamente 24 sensores.
+- Solo numeros reales, sin booleanos ni cadenas.
+- Valores finitos.
+- Rango permitido configurable.
+- Sin campos adicionales.
+"""
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 import math
-import traceback
 
 import numpy as np
 import onnxruntime as ort
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator
+)
 
 
 BASE = Path(__file__).resolve().parent.parent
-MODELO = BASE / "models" / "modelo.onnx"
+MODELO_ONNX = BASE / "models" / "modelo.onnx"
 
-sesion = None
-entrada_modelo = None
-tipo_entrada = None
-cantidad_sensores = None
+# AJUSTAR SOLO DESPUES DE REVISAR EL DATASET
+SENSOR_MIN = 0.0
+SENSOR_MAX = 1.0
+NUM_SENSORES = 24
 
 
 class InputData(BaseModel):
-    """Valida las 24 lecturas de los sensores."""
+    """Esquema estricto para las lecturas de sensores."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        allow_inf_nan=False
+    )
 
     sensores: Annotated[
         list[float],
-        Field(min_length=24, max_length=24)
+        Field(
+            min_length=NUM_SENSORES,
+            max_length=NUM_SENSORES,
+            description="Lecturas de los 24 sensores"
+        )
     ]
 
     @field_validator("sensores", mode="before")
     @classmethod
-    def validar_numeros(cls, valor):
-        if not isinstance(valor, list):
-            raise ValueError("Debe enviar una lista.")
+    def validar_tipos(cls, valor):
+        """Rechaza cadenas, booleanos y otros tipos."""
 
-        if any(
-            isinstance(x, bool)
-            or not isinstance(x, (int, float))
-            for x in valor
-        ):
+        if not isinstance(valor, list):
             raise ValueError(
-                "Los sensores deben contener números."
+                "sensores debe ser una lista."
             )
+
+        for indice, sensor in enumerate(valor, start=1):
+
+            if isinstance(sensor, bool):
+                raise ValueError(
+                    f"Sensor {indice}: no se permiten booleanos."
+                )
+
+            if not isinstance(sensor, (int, float)):
+                raise ValueError(
+                    f"Sensor {indice}: debe ser numerico."
+                )
 
         return valor
 
     @field_validator("sensores")
     @classmethod
-    def validar_rangos(cls, valores):
-        if any(not math.isfinite(x) for x in valores):
-            raise ValueError(
-                "No se permiten valores infinitos o NaN."
-            )
+    def validar_rangos(cls, sensores):
+        """Comprueba finitud y rango de cada sensor."""
 
-        if any(x < 0 for x in valores):
-            raise ValueError(
-                "Los sensores no pueden ser negativos."
-            )
+        for indice, valor in enumerate(
+            sensores, start=1
+        ):
 
-        return valores
+            if not math.isfinite(valor):
+                raise ValueError(
+                    f"Sensor {indice}: valor no finito."
+                )
 
+            if not SENSOR_MIN <= valor <= SENSOR_MAX:
+                raise ValueError(
+                    f"Sensor {indice}: {valor} fuera "
+                    f"del rango [{SENSOR_MIN}, {SENSOR_MAX}]."
+                )
 
-class PredictionResponse(BaseModel):
-    prediccion: int | float | str
-    modelo: str
-    cantidad_sensores: int
+        return sensores
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Carga el modelo ONNX una sola vez."""
+    """Carga y libera la sesion ONNX."""
 
-    global sesion
-    global entrada_modelo
-    global tipo_entrada
-    global cantidad_sensores
-
-    if not MODELO.exists():
+    if not MODELO_ONNX.is_file():
         raise RuntimeError(
-            f"No existe el modelo: {MODELO}. "
-            "Ejecuta primero p3_01_onnx.py."
+            f"Modelo ONNX no encontrado: {MODELO_ONNX}"
         )
 
     sesion = ort.InferenceSession(
-        str(MODELO),
+        str(MODELO_ONNX),
         providers=["CPUExecutionProvider"]
     )
 
     entradas = sesion.get_inputs()
-    salidas = sesion.get_outputs()
-
-    print("\n=== INFORMACION DEL MODELO ONNX ===")
-
-    for entrada in entradas:
-        print(
-            "Entrada:",
-            entrada.name,
-            entrada.type,
-            entrada.shape
-        )
-
-    for salida in salidas:
-        print(
-            "Salida:",
-            salida.name,
-            salida.type,
-            salida.shape
-        )
 
     if len(entradas) != 1:
         raise RuntimeError(
-            "La API espera un modelo con una entrada."
+            "Se esperaba una sola entrada ONNX."
         )
 
-    entrada_modelo = entradas[0].name
-    tipo_entrada = entradas[0].type
+    entrada = entradas[0]
 
-    forma = entradas[0].shape
-
-    if len(forma) != 2:
+    if (
+        len(entrada.shape) != 2
+        or entrada.shape[1] != NUM_SENSORES
+    ):
         raise RuntimeError(
-            "Se esperaba una entrada de dos dimensiones."
+            "El modelo ONNX no tiene las "
+            "24 variables de entrada esperadas."
         )
 
-    cantidad_sensores = forma[1]
+    app.state.sesion_onnx = sesion
+    app.state.nombre_entrada = entrada.name
 
-    if cantidad_sensores != 24:
-        raise RuntimeError(
-            "El modelo ONNX no espera 24 sensores. "
-            f"Forma encontrada: {forma}"
-        )
-
-    print("Modelo cargado correctamente.")
+    print("Modelo ONNX cargado correctamente.")
+    print("Sensores esperados:", NUM_SENSORES)
 
     yield
 
-    sesion = None
-    entrada_modelo = None
+    app.state.sesion_onnx = None
 
 
 app = FastAPI(
     title="API Machine Learning - Practica 3",
-    description="Predicciones Wall-Following mediante ONNX.",
-    version="1.0.0",
+    description=(
+        "API de prediccion Random Forest "
+        "con ONNX y validacion Pydantic."
+    ),
+    version="1.1.0",
     lifespan=lifespan
 )
 
 
 @app.get("/health")
 def health():
-    """Verifica el estado de la API."""
+    """Devuelve el estado de la API."""
+
+    if getattr(app.state, "sesion_onnx", None) is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Modelo no disponible."
+        )
 
     return {
         "estado": "ok",
-        "modelo_cargado": sesion is not None,
-        "modelo": "Random Forest ONNX"
+        "modelo": "Random Forest ONNX",
+        "sensores_esperados": NUM_SENSORES,
+        "rango_permitido": {
+            "minimo": SENSOR_MIN,
+            "maximo": SENSOR_MAX
+        }
     }
 
 
-@app.post(
-    "/predict",
-    response_model=PredictionResponse
-)
+@app.post("/predict")
 def predict(datos: InputData):
-    """Predice a partir de 24 sensores validados."""
+    """Valida las lecturas y ejecuta la inferencia."""
+
+    sesion = getattr(
+        app.state, "sesion_onnx", None
+    )
 
     if sesion is None:
         raise HTTPException(
             status_code=503,
-            detail="El modelo no está disponible."
+            detail="Modelo no disponible."
         )
 
-    if tipo_entrada == "tensor(float)":
-        dtype = np.float32
-    elif tipo_entrada == "tensor(double)":
-        dtype = np.float64
-    else:
-        raise HTTPException(
-            status_code=500,
-            detail="Tipo de entrada ONNX no compatible."
-        )
-
-    valores = np.asarray(
+    entrada = np.asarray(
         [datos.sensores],
-        dtype=dtype
+        dtype=np.float32
     )
 
-    try:
-        salidas = sesion.run(
-            None,
-            {entrada_modelo: valores}
+    if not np.isfinite(entrada).all():
+        raise HTTPException(
+            status_code=422,
+            detail="Valores no representables en float32."
         )
 
-        if not salidas:
-            raise RuntimeError(
-                "ONNX no devolvió resultados."
-            )
-
-        # La primera salida del clasificador suele
-        # contener la etiqueta predicha.
-        primera_salida = salidas[0]
+    try:
+        resultados = sesion.run(
+            None,
+            {
+                app.state.nombre_entrada: entrada
+            }
+        )
 
         prediccion = np.asarray(
-            primera_salida
-        ).reshape(-1)[0]
-
-        if isinstance(prediccion, np.generic):
-            prediccion = prediccion.item()
-
-        if isinstance(prediccion, bytes):
-            prediccion = prediccion.decode("utf-8")
-
-        if not isinstance(
-            prediccion, (int, float, str)
-        ):
-            raise TypeError(
-                "La salida del modelo no es una "
-                "etiqueta de clasificación válida."
-            )
-
-        return PredictionResponse(
-            prediccion=prediccion,
-            modelo="Random Forest ONNX",
-            cantidad_sensores=len(datos.sensores)
-        )
+            resultados[0]
+        ).reshape(-1)[0].item()
 
     except Exception as error:
-        print("\n=== ERROR DE INFERENCIA ===")
-        traceback.print_exc()
+        print("Error ONNX:", error)
 
         raise HTTPException(
             status_code=500,
-            detail="Error durante la inferencia."
+            detail="Error interno de inferencia."
         ) from error
+
+    return {
+        "prediccion": prediccion,
+        "modelo": "Random Forest ONNX",
+        "cantidad_sensores": len(datos.sensores),
+        "validacion": "correcta"
+    }

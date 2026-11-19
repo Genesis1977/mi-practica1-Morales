@@ -1,0 +1,265 @@
+[
+    {
+        "caso": "Entrada valida",
+        "codigo_esperado": 200,
+        "codigo_obtenido": 500,
+        "aprobado": false,
+        "respuesta": {
+            "detail": "Error interno de inferencia."
+        }
+    },
+    {
+        "caso": "Solo tres sensores",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "too_short",
+                    "loc": [
+                        "body",
+                        "sensores"
+                    ],
+                    "msg": "List should have at least 24 items after validation, not 3",
+                    "input": [
+                        0.1,
+                        0.2,
+                        0.3
+                    ],
+                    "ctx": {
+                        "field_type": "List",
+                        "min_length": 24,
+                        "actual_length": 3
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "caso": "Sensor con texto",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "value_error",
+                    "loc": [
+                        "body",
+                        "sensores"
+                    ],
+                    "msg": "Value error, Sensor 1: debe ser numerico.",
+                    "input": [
+                        "hola",
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5
+                    ],
+                    "ctx": {
+                        "error": {}
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "caso": "Sensor negativo fuera de rango",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "value_error",
+                    "loc": [
+                        "body",
+                        "sensores"
+                    ],
+                    "msg": "Value error, Sensor 1: -1.0 fuera del rango [0.0, 1.0].",
+                    "input": [
+                        -1.0,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5
+                    ],
+                    "ctx": {
+                        "error": {}
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "caso": "Sensor superior al maximo",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "value_error",
+                    "loc": [
+                        "body",
+                        "sensores"
+                    ],
+                    "msg": "Value error, Sensor 1: 2.0 fuera del rango [0.0, 1.0].",
+                    "input": [
+                        2.0,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5
+                    ],
+                    "ctx": {
+                        "error": {}
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "caso": "Campo adicional",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "extra_forbidden",
+                    "loc": [
+                        "body",
+                        "usuario"
+                    ],
+                    "msg": "Extra inputs are not permitted",
+                    "input": "prueba"
+                }
+            ]
+        }
+    },
+    {
+        "caso": "Sensor booleano",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "value_error",
+                    "loc": [
+                        "body",
+                        "sensores"
+                    ],
+                    "msg": "Value error, Sensor 1: no se permiten booleanos.",
+                    "input": [
+                        true,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5
+                    ],
+                    "ctx": {
+                        "error": {}
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "caso": "Sensores ausentes",
+        "codigo_esperado": 422,
+        "codigo_obtenido": 422,
+        "aprobado": true,
+        "respuesta": {
+            "detail": [
+                {
+                    "type": "missing",
+                    "loc": [
+                        "body",
+                        "sensores"
+                    ],
+                    "msg": "Field required",
+                    "input": {}
+                }
+            ]
+        }
+    }
+]
