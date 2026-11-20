@@ -768,3 +768,173 @@ Los resultados corresponden a simulaciones y experimentos académicos. No consti
 Se utilizan semillas fijas cuando corresponde, se separan los conjuntos de entrenamiento, validación y prueba, y se conservan los modelos y reportes generados.
 
 El rendimiento y los tiempos de ejecución pueden variar según el equipo y las versiones de las dependencias.
+
+# Práctica 3 — Despliegue, Profiling y Green AI
+
+## 1. Descripción
+
+La Práctica 3 implementa el despliegue de un modelo de clasificación Random Forest para el problema *Wall-Following Robot Navigation*. El modelo entrenado se exporta al formato ONNX y se integra en una API REST desarrollada con FastAPI.
+
+La API utiliza Pydantic para validar las solicitudes y Docker para facilitar su ejecución en un entorno reproducible. También se realizan pruebas de rendimiento y un análisis estimado de sostenibilidad energética.
+
+## 2. Objetivos
+
+- Exportar un modelo Random Forest al formato ONNX.
+- Implementar una API REST con los endpoints `/health` y `/predict`.
+- Validar la estructura y los valores de las solicitudes mediante Pydantic.
+- Desplegar la API en un contenedor Docker.
+- Medir RAM y latencia mediante 100 solicitudes.
+- Comparar el rendimiento de ONNX y Random Forest original.
+- Estimar consumo energético y emisiones de CO₂ equivalente.
+
+## 3. Tecnologías
+
+Python 3.10, scikit-learn, ONNX Runtime, FastAPI, Pydantic, Docker, NumPy, Pandas, Matplotlib y GitHub.
+
+## 4. Archivos principales
+
+| Archivo | Función |
+|---|---|
+| `app/api.py` | API REST y validación de datos |
+| `models/modelo.onnx` | Modelo exportado a ONNX |
+| `models/random_forest.pkl` | Modelo original |
+| `Dockerfile` | Construcción del contenedor |
+| `requirements-api.txt` | Dependencias de la API |
+| `src/p3_06_profiling.py` | Medición de RAM y latencia |
+| `src/p3_07_green_ai.py` | Estimación energética y de emisiones |
+| `reports/profiling.json` | Resultados numéricos de profiling |
+| `reports/profiling.png` | Gráfico comparativo |
+| `reports/green_ai.md` | Informe de sostenibilidad |
+
+## 5. Instalación
+
+Clonar el repositorio:
+
+```powershell
+git clone https://github.com/Genesis1977/mi-practica1-Morales.git
+cd mi-practica1-Morales
+```
+
+Crear y activar el entorno virtual:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+Instalar las dependencias generales:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Para ejecutar la API localmente:
+
+```powershell
+python -m pip install -r requirements-api.txt
+python -m uvicorn app.api:app --reload
+```
+
+La documentación interactiva estará disponible en `http://localhost:8000/docs`.
+
+## 6. Despliegue con Docker
+
+Construir la imagen desde la raíz del proyecto:
+
+```powershell
+docker build -t ml-api .
+```
+
+Iniciar el contenedor:
+
+```powershell
+docker run --name practica3-api -p 8000:8000 ml-api
+```
+
+Comprobar su estado:
+
+```powershell
+docker ps
+```
+
+Verificar la API:
+
+```powershell
+Invoke-RestMethod http://localhost:8000/health
+```
+
+La ruta `POST /predict` recibe un objeto JSON con una lista `sensores` de exactamente 24 valores numéricos.
+
+**Contrato de entrada:** los sensores deben encontrarse en el mismo orden y escala transformada utilizados para entrenar el modelo. La API no aplica automáticamente el escalador a lecturas sin procesar.
+
+## 7. Validación Pydantic
+
+La API comprueba la cantidad de sensores, los tipos numéricos, la ausencia de valores booleanos o cadenas, la finitud de los datos, su compatibilidad con `float32` y la ausencia de campos adicionales.
+
+**Limitación:** los límites específicos de dominio para cada sensor aún requieren justificación. Los valores transformados del dataset pueden ser negativos y superiores a uno, por lo que no corresponde aplicar indiscriminadamente el intervalo `[0,1]`.
+
+Las entradas inválidas producen respuestas HTTP 422.
+
+## 8. Resultados de Profiling — Sesión 6
+
+Se realizaron 100 peticiones HTTP a la API y 100 inferencias directas para cada uno de los dos modelos.
+
+| Método | Latencia promedio |
+|---|---:|
+| API FastAPI en Docker | 48.0927 ms |
+| ONNX directo | 0.0486 ms |
+| Random Forest original | 37.6765 ms |
+
+La memoria del contenedor pasó de 69.877 MB a 69.982 MB, una diferencia de 0.105 MB entre dos mediciones puntuales.
+
+Las predicciones de los métodos coincidieron para la muestra evaluada.
+
+Las pruebas directas se ejecutaron en el entorno local y las peticiones HTTP se realizaron contra Docker. Por tanto, los tiempos no representan una comparación aislada de los motores de inferencia bajo idénticas condiciones.
+
+Reproducir el profiling:
+
+```powershell
+python -m src.p3_06_profiling
+```
+
+Resultados: `reports/profiling.json` y `reports/profiling.png`.
+
+## 9. Green AI — Sesión 7
+
+Se estimó el consumo energético mediante:
+
+**Energía (Wh) = Potencia (W) × Tiempo (s) / 3600**
+
+La huella de carbono se estimó utilizando la energía en kWh y un factor de emisión expresado en kg CO₂e/kWh.
+
+Se emplearon dos supuestos ilustrativos: potencia constante de 50 W y factor de emisión de 0.4 kg CO₂e/kWh.
+
+| Método | Energía estimada para 100 operaciones | CO₂e estimado |
+|---|---:|---:|
+| API Docker | 0.066795 Wh | 0.026718 g |
+| ONNX directo | 0.0000675 Wh | 0.000027 g |
+| Random Forest original | 0.052328 Wh | 0.020931 g |
+
+Los resultados son estimaciones basadas en latencias y supuestos de potencia, no mediciones eléctricas directas.
+
+### Propuestas de mejora
+
+**Optimización 1 — Uso de ONNX Runtime.** Evaluar el uso de ONNX para reducir la latencia de inferencia y el tiempo activo de procesamiento, verificando equivalencia de predicciones y consumo energético bajo condiciones comparables.
+
+**Optimización 2 — Reducción de recursos de despliegue.** Mantener una imagen Docker ligera, instalar únicamente las dependencias necesarias para inferencia y evitar procesos o servicios innecesarios. Evaluar el impacto en memoria, tiempo de arranque y consumo.
+
+Reproducir el informe:
+
+```powershell
+python -m src.p3_07_green_ai
+```
+
+Entregable: `reports/green_ai.md`.
+
+## 10. Conclusiones
+
+La Práctica 3 permitió integrar un modelo Random Forest con ONNX, FastAPI, Pydantic y Docker, obteniendo un servicio funcional de clasificación a partir de 24 sensores transformados.
+
+El profiling mostró una latencia directa de ONNX inferior a la del modelo original en las condiciones experimentales evaluadas. El análisis Green AI permitió relacionar tiempo de ejecución, energía estimada y emisiones hipotéticas.
+
+Los resultados corresponden a pruebas sobre un dataset y una API local; no representan una validación física de un robot ni una medición directa de consumo eléctrico.
