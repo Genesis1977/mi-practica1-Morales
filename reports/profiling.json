@@ -1,0 +1,72 @@
+{
+    "practica": "P3",
+    "sesion": 6,
+    "fecha_utc": "2026-11-20T05:54:29.187199+00:00",
+    "dataset": "data\\processed\\dataset.parquet",
+    "numero_sensores": 24,
+    "numero_pruebas": 100,
+    "rango_muestra": {
+        "minimo": -0.6057441234588623,
+        "maximo": 1.217881441116333
+    },
+    "unidad_latencia": "milisegundos",
+    "ram_contenedor": {
+        "antes": {
+            "contenedor": "practica3-api",
+            "memoria_usada": "66.64MiB",
+            "ram_mb": 69.877
+        },
+        "despues": {
+            "contenedor": "practica3-api",
+            "memoria_usada": "66.74MiB",
+            "ram_mb": 69.982
+        },
+        "metodo": "docker stats --no-stream"
+    },
+    "latencia": {
+        "api_docker": {
+            "peticiones": 100,
+            "promedio_ms": 48.0927,
+            "mediana_ms": 47.9654,
+            "minimo_ms": 45.7337,
+            "maximo_ms": 53.8334,
+            "p95_ms": 49.2604,
+            "desviacion_ms": 1.02
+        },
+        "onnx_directo": {
+            "peticiones": 100,
+            "promedio_ms": 0.0486,
+            "mediana_ms": 0.038,
+            "minimo_ms": 0.036,
+            "maximo_ms": 0.6423,
+            "p95_ms": 0.0722,
+            "desviacion_ms": 0.061
+        },
+        "random_forest_original": {
+            "peticiones": 100,
+            "promedio_ms": 37.6765,
+            "mediana_ms": 37.6504,
+            "minimo_ms": 29.5242,
+            "maximo_ms": 45.6708,
+            "p95_ms": 41.7147,
+            "desviacion_ms": 2.3916
+        }
+    },
+    "predicciones": {
+        "api": "Move-Forward",
+        "onnx": "Move-Forward",
+        "original": "Move-Forward",
+        "coinciden_en_muestra": true
+    },
+    "metodologia": {
+        "entrada": "Una muestra transformada real reutilizada en las 100 pruebas",
+        "calentamiento": "Una ejecucion por metodo",
+        "api": "HTTP local hacia Docker",
+        "modelos": "Inferencia local en Windows",
+        "nota": "RAM medida solo antes y despues, no representa el pico. La latencia HTTP incluye transporte y procesamiento. La comparacion local de modelos no aisla diferencias de entorno ni garantiza equivalencia del preprocesamiento."
+    },
+    "equipo": {
+        "cpu_logicos": 16,
+        "ram_total_gb": 25.05
+    }
+}
